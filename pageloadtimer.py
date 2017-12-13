@@ -62,8 +62,9 @@ if __name__ == '__main__':
 
     url = 'http://buzz4pun.com'
     options = webdriver.ChromeOptions()
-    #uncomment to run headless	
-    #options.add_argument('headless')
+    #uncomment to run headless
+    options.add_argument('headless')
+    #used igcognito to disable caches
     options.add_argument('incognito')
     options.add_argument('window-size=1920x1080')
     driver = webdriver.Chrome(executable_path="/usr/lib/chromium-browser/chromedriver",chrome_options=options)
@@ -91,8 +92,8 @@ if __name__ == '__main__':
 
     	print "%s: %s" % (key, events_time[key])
 
-    #based on tripadvisor
-    #http://engineering.tripadvisor.com/html5-navigation-timing/
+        #based on tripadvisor
+        #http://engineering.tripadvisor.com/html5-navigation-timing/
 
     latency = events_time["responseStart"] - events_time["fetchStart"]
     transfer = events_time["responseEnd"] - events_time["responseStart"]
@@ -105,6 +106,8 @@ if __name__ == '__main__':
 
     print "-----------------------------\n"
     	
-    print "total page load: %sms\nlatency: %sms\ntransfer: %sms\ndom processing load to interactive: %sms\ndom processing interactive to complete: %sms\nonload: %sms" % (total, latency, transfer, dom_processing, dom_interactive, onload)
+    print "Total Page load: %sms\n\n" % total
+    print "** Page Load Break down\n"
+    print "latency: %sms\ntransfer: %sms\ndom processing load to interactive: %sms\ndom processing interactive to complete: %sms\nonload: %sms" % (latency, transfer, dom_processing, dom_interactive, onload)
 
 	
