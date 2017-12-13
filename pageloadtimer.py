@@ -8,8 +8,6 @@ import collections
 import textwrap
 
 from selenium import webdriver
-from xvfbwrapper import Xvfb
-
 
 class PageLoadTimer:
 
@@ -31,6 +29,7 @@ class PageLoadTimer:
         return timings
 
     def get_event_times(self):
+
         timings = self.inject_timing_js()
         # the W3C Navigation Timing spec guarantees a monotonic clock:
         #  "The difference between any two chronologically recorded timing
@@ -56,37 +55,54 @@ class PageLoadTimer:
                           )
         event_times = ((event, timings[event] - min(good_values)) for event
                        in ordered_events if event in timings)
+
         return collections.OrderedDict(event_times)
 
 
 if __name__ == '__main__':
-    with Xvfb() as xvfb:
-        url = 'http://google.com'
-        driver = webdriver.Firefox()
-        #driver = webdriver.Chrome()
-        #driver = webdriver.PhantomJS()
-        driver.get(url)
-        timer = PageLoadTimer(driver)
-        events_time = timer.get_event_times()
-        
-        total_page_load_time = ""
-        total_request_respond_time = ""
-	total_page_render_time = ""
-	
-	print "** Events Time"
-	print "----------------------------"
-	for key in events_time.iterkeys():
 
-		print "%s: %s" % (key, events_time[key])
+    url = 'http://buzz4pun.com'
+    options = webdriver.ChromeOptions()
+    options.add_argument('headless')
+    options.add_argument('incognito')
+    options.add_argument('window-size=1920x1080')
+    driver = webdriver.Chrome(executable_path="/usr/lib/chromium-browser/chromedriver",chrome_options=options)
+    driver.implicitly_wait(10)
+    
+    driver.get(url)
 
-		total_page_load_time = (events_time["loadEventEnd"] - events_time["navigationStart"])
-		total_request_respond_time = (events_time["responseEnd"] - events_time["requestStart"])
-		total_page_render_time = (events_time["domComplete"] - events_time["domLoading"])
+    timer = PageLoadTimer(driver)
+    events_time = timer.get_event_times()
+   
+    driver.quit()
+	 
+    latency = ""
+    transfer = ""
+    dom_processing = ""
+    dom_interactive = ""
+    onload = ""
+    total = ""
 
-	print "-----------------------------"
-		
-	print "Total Page Load Time: %s ms" % total_page_load_time 
-	print "Total Request Respond Time: %s ms" % total_request_respond_time
-	print "Total Page Render Time: %s ms" % total_page_render_time
+    print "** Events Time"
+    print "----------------------------\n"
+    for key in events_time.iterkeys():
+
+    	print "%s: %s" % (key, events_time[key])
+
+        #based on tripadvisor
+        #http://engineering.tripadvisor.com/html5-navigation-timing/
+
+        latency = events_time["responseStart"] - events_time["fetchStart"]
+        transfer = events_time["responseEnd"] - events_time["responseStart"]
+        dom_processing = events_time["domInteractive"] - events_time["domLoading"]
+        dom_interactive = events_time["domComplete"] - events_time["domInteractive"]
+        onload = events_time["loadEventEnd"] - events_time["loadEventStart"]
+
+    total = latency + transfer + dom_processing + dom_interactive + onload
+
+
+    print "-----------------------------\n"
+    	
+    print "total page load: %sms\nlatency: %sms\ntransfer: %sms\ndom processing load to interactive: %sms\ndom processing interactive to complete: %sms\nonload: %sms" % (total, latency, transfer, dom_processing, dom_interactive, onload)
 
 	
