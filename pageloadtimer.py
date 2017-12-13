@@ -47,8 +47,7 @@ class PageLoadTimer:
         # fields.
         ordered_events = ('navigationStart', 'fetchStart', 'domainLookupStart',
                           'domainLookupEnd', 'connectStart', 'connectEnd',
-                          'secureConnectionStart', 'requestStart',
-                          'responseStart', 'responseEnd', 'domLoading',
+                          'requestStart','responseStart', 'responseEnd', 'domLoading',
                           'domInteractive', 'domContentLoadedEventStart',
                           'domContentLoadedEventEnd', 'domComplete',
                           'loadEventStart', 'loadEventEnd'
@@ -63,7 +62,8 @@ if __name__ == '__main__':
 
     url = 'http://buzz4pun.com'
     options = webdriver.ChromeOptions()
-    options.add_argument('headless')
+    #uncomment to run headless	
+    #options.add_argument('headless')
     options.add_argument('incognito')
     options.add_argument('window-size=1920x1080')
     driver = webdriver.Chrome(executable_path="/usr/lib/chromium-browser/chromedriver",chrome_options=options)
@@ -73,6 +73,7 @@ if __name__ == '__main__':
 
     timer = PageLoadTimer(driver)
     events_time = timer.get_event_times()
+
    
     driver.quit()
 	 
@@ -85,18 +86,19 @@ if __name__ == '__main__':
 
     print "** Events Time"
     print "----------------------------\n"
+    
     for key in events_time.iterkeys():
 
     	print "%s: %s" % (key, events_time[key])
 
-        #based on tripadvisor
-        #http://engineering.tripadvisor.com/html5-navigation-timing/
+    #based on tripadvisor
+    #http://engineering.tripadvisor.com/html5-navigation-timing/
 
-        latency = events_time["responseStart"] - events_time["fetchStart"]
-        transfer = events_time["responseEnd"] - events_time["responseStart"]
-        dom_processing = events_time["domInteractive"] - events_time["domLoading"]
-        dom_interactive = events_time["domComplete"] - events_time["domInteractive"]
-        onload = events_time["loadEventEnd"] - events_time["loadEventStart"]
+    latency = events_time["responseStart"] - events_time["fetchStart"]
+    transfer = events_time["responseEnd"] - events_time["responseStart"]
+    dom_processing = events_time["domInteractive"] - events_time["domLoading"]
+    dom_interactive = events_time["domComplete"] - events_time["domInteractive"]
+    onload = events_time["loadEventEnd"] - events_time["loadEventStart"]
 
     total = latency + transfer + dom_processing + dom_interactive + onload
 
